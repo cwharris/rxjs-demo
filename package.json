@@ -11,7 +11,5 @@
     "stylus": "*",
     "connect-assets": "~2.4.0",
     "coffee-script": "~1.5.0",
-    "rx": "~2.0.2",
-    "rxjs-jquery": "0.0.1"
   }
 }
