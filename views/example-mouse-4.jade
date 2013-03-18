@@ -1,0 +1,16 @@
+extends layout
+
+block content
+	h1 Mouse Input
+
+block scripts
+	script
+
+		var xSpan = $('<div>').appendTo('body');
+		var ySpan = $('<div>').appendTo('body');
+
+		$(document).onAsObservable('mousemove')
+			.subscribe(function(e) {
+				xSpan.html('x: ' + e.pageX);
+				ySpan.html('y: ' + e.pageY);
+			});

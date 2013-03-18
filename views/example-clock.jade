@@ -1,0 +1,59 @@
+extends layout
+
+block content
+	h1 Mouse Input
+
+block styles
+
+	style
+
+		.time-bar {
+			background: red;
+			width: 100px;
+			height: 100px;
+			-webkit-transition: width .5s;
+		}
+
+block scripts
+	script
+
+		var millisecond = $('<div class="time-bar">').appendTo('body');
+		var second = $('<div class="time-bar">').appendTo('body');
+		var minute = $('<div class="time-bar">').appendTo('body');
+
+		var time = Rx.Observable.timer(0, 1)
+			.select(function() { return new Date(); });
+
+		var milliseconds = time.select(function(time) {
+			return time.getMilliseconds();
+			});
+
+		var seconds = time
+			.select(function(time) {
+				return time.getSeconds();
+			})
+
+		var minutes = time
+			.select(function(time) {
+				return time.getMinutes();
+			})
+
+		milliseconds.subscribe(function(percent) {
+			percent /= 10;
+			console.log(percent);
+			millisecond.css({
+					'width': percent + '%'
+				});
+			});
+
+		seconds.subscribe(function(percent) {
+			second.css({
+					'width': percent + '%'
+				});
+			});
+
+		minutes.subscribe(function(percent) {
+			minute.css({
+					'width': percent + '%'
+				});
+			});

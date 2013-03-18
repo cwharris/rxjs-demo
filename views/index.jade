@@ -1,5 +1,17 @@
 extends layout
 
 block content
-  h1= title
-  p Welcome to #{title}
+	h1= title
+	p Welcome to #{title}
+
+block scripts
+
+	:coffeescript
+
+		obs = Rx.Observable.timer(0, 100).publish()
+		con = obs.connect()
+
+		obs.delaySubscription(1000).subscribe (x) -> console.log 'a', x
+		obs.delaySubscription(2000).subscribe (x) -> console.log 'b', x
+		obs.delaySubscription(3000).subscribe (x) -> console.log 'c', x
+		obs.delaySubscription(4000).subscribe -> con.dispose()

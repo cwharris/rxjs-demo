@@ -1,0 +1,62 @@
+extends layout
+
+block styles
+
+	style
+
+		.images {
+			white-space: nowrap;
+			overflow: visible;
+		}
+
+		.images img {
+			display: block;
+			border: 2px solid transparent;
+			box-shadow: 0px 0px 5px rgba(0,0,0,0.5);
+			margin: 5px auto;
+			margin: 10px;
+		}
+
+block content
+
+	h1 Example 2
+
+	div.images
+
+block scripts
+
+	script
+
+		var uri = 'http://api.flickr.com/services/rest/?method=flickr.photos.getRecent&api_key=ebaa8971d3200a368c4d412435d1fa59&per_page=1&format=json&jsoncallback=?';
+		var latestPhotos = 
+
+		Rx.Observable.returnValue().selectMany(function() {
+				return $.getJSONAsObservable(uri);
+			})
+			.select(function(data) {
+				return data.data.photos.photo;
+				})
+			.concat(Rx.Observable.timer(1000).select(function(){return[];}))
+			.repeat()
+			.scan([], function(acc, photos) {
+					for (var i = 0, length = photos.length; i < length; i++) {
+						console.log(photos[i].id);
+						acc.push(photos[i]);
+					}
+					return acc;
+				})
+			.subscribe(function(photos) {
+				var dat = d3.select('.images').selectAll('img')
+					.data(photos, function(photo) {
+						return photo.id
+						});
+
+				dat.enter()
+					.insert('img', ':first-child')
+					.attr('src', function(photo) {
+						return 'http://farm' + photo.farm + '.staticflickr.com/' + photo.server + '/' + photo.id + '_' + photo.secret + '_b.jpg';
+					});
+
+				dat.exit()
+					.remove();
+			});

@@ -1,0 +1,81 @@
+extends layout
+
+block styles
+
+	style
+
+		input {
+			display: block;
+		}
+
+		img {
+			display: block;
+			float: left;
+			border: 2px solid transparent;
+			box-shadow: 0px 0px 5px rgba(0,0,0,0.5);
+			margin: 5px
+		}
+
+block content
+
+	h1 Example 2
+
+block scripts
+
+	script
+
+		(function() {
+
+			Rx.Observable.combineTemplate = function(sources) {
+
+				var keys = [];
+				var values = [];
+
+				for (var key in sources) {
+					keys.push(key);
+					values.push(sources[key]);
+				}
+
+				return Rx.Observable.combineLatest(values, function() {
+					var template = {};
+					for (var i = 0, len = keys.length; i < len; i++) {
+						template[keys[i]] = arguments[i];
+					}
+					return template;
+				});
+			};
+
+			$.fn.valAsObservable = function (event, throttleTime) {
+				return $(this).onAsObservable(event)
+					.throttle(throttleTime || 0)
+					.select(function(e) { return $(e.target).val(); });
+			};
+
+		})();
+
+	script
+
+		var obs = new Rx.BehaviorSubject()
+
+		var tags = $('<input type="text"/>').appendTo('body');
+		var perPage = $('<input type="text"/>').appendTo('body');
+
+		Rx.Observable.combineTemplate({
+				tags: tags.valAsObservable('keydown', 250).distinctUntilChanged(),
+				perPage: perPage.valAsObservable('keydown', 250).distinctUntilChanged(),
+			})
+			.selectMany(function(x) {
+					return $.getJSONAsObservable('http://api.flickr.com/services/rest/?method=flickr.photos.search&api_key=d7a6df186f763f723cdfaf4c113b4840&tags=' + x.tags + '&per_page=' + x.perPage + '&format=json&jsoncallback=?')
+						.select(function(res) {
+								return res.data.photos.photo;
+							})				
+			})
+			.subscribe(function(photos) {
+				$('img').remove();
+				console.log(photos);
+				for(var i = 0, len = photos.length; i < len; i++) {
+					var photo = photos[i];
+					var url = 'http://farm' + photo.farm + '.staticflickr.com/' + photo.server + '/' + photo.id + '_' + photo.secret + '_b.jpg';
+					$('<img src="' + url + '" />').appendTo('body');
+				}
+			});

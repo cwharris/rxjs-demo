@@ -1,0 +1,46 @@
+extends layout
+
+block content
+	h1 Mouse Input
+
+block scripts
+	script
+
+		var xSpan = $('<div>').appendTo('body');
+		var ySpan = $('<div>').appendTo('body');
+		var xDeltaSpan = $('<div>').appendTo('body');
+		var yDeltaSpan = $('<div>').appendTo('body');
+		var mouseStateSpan = $('<div>').appendTo('body');
+
+		var x = 0;
+		var y = 0;
+		var xDelta = 0;
+		var yDelta = 0;
+		var isDown = false;
+
+		$(document).on('mousedown', function (e) {
+			isDown = true;
+		});
+
+		$(document).on('mouseup', function (e) {
+			isDown = false;
+		});
+
+		$(document).on('mousemove', function (e) {
+
+			if (isDown) {
+
+				xDelta = e.pageX - x;
+				yDelta = e.pageY - y;
+				x = e.pageX;
+				y = e.pageY;
+				xSpan.html('x: ' + x);
+				ySpan.html('y: ' + y);
+				xDeltaSpan.html('x ∆: ' + xDelta);
+				yDeltaSpan.html('y ∆: ' + yDelta);
+			
+			}
+
+			mouseStateSpan.html('state: ' + (isDown ? 'down' : 'up'));
+
+		});

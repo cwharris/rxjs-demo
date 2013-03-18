@@ -1,0 +1,33 @@
+extends layout
+
+block scripts
+
+	script
+
+		var Thing = function() {
+
+			var handlers = [];
+
+			this.onChange = function(handler) {
+				handlers.push(handler);
+			};
+
+			this.change = function(value) {
+				for (var i = 0, length = handlers.length; i < length; i++) {
+					handlers[i](value);
+				}
+			};
+		};
+
+	script
+
+		// a = something that can change
+
+		var a = new Thing();
+
+		a.onChange(function(value) {
+				console.log('a', value);
+			});
+
+		a.change(1);
+		a.change(2);

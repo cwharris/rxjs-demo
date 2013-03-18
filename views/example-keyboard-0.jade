@@ -1,0 +1,61 @@
+extends layout
+
+block content
+	h1 Mouse Input
+
+block scripts
+	script
+
+		var down = $(document).onAsObservable('keydown')
+		var up = $(document).onAsObservable('keyup');
+
+		var keys = down
+			.groupByUntil(
+				function (e) { return e.which; },
+				function (e) { return e; },
+				function (g) { return up.where(function (e) { return e.which === g.key; }); }
+				)
+			.selectMany(function (g) {
+				return g.take(1);
+			})
+			.selectMany(function (e) {
+				return Rx.Observable.timer(0, 100)
+					.select(function () {
+						return e;
+					})
+					.takeUntil(up.where(function (b) { return e.which === b.which; }));
+			})
+			.doAction(function (e) { console.log(e.which); });
+
+		var controls = new Rx.CompositeDisposable();
+
+		Rx.Observable.merge(
+			keys.where(function (e) { return e.which === 37; }),
+			keys.where(function (e) { return e.which === 37; })
+			);
+
+		controls.add(keys.where(function (e) { return e.which === 37; })
+			.subscribe(function (e) {
+				console.log('left');
+			}));
+
+		controls.add(keys.where(function (e) { return e.which === 38; })
+			.subscribe(function (e) {
+				console.log('up');
+			}));
+
+		controls.add(keys.where(function (e) { return e.which === 39; })
+			.subscribe(function (e) {
+				console.log('right');
+			}));
+
+		controls.add(keys.where(function (e) { return e.which === 40; })
+			.subscribe(function (e) {
+				console.log('down');
+			}));
+
+		controls.add(keys.where(function (e) { return e.which === 32; })
+			.subscribe(function (e) {
+				console.log('stop!');
+				controls.dispose();
+			}));

@@ -1,0 +1,36 @@
+extends layout
+
+block content
+	h1 Mouse Input
+
+block scripts
+	script
+
+		var xSpan = $('<div>').appendTo('body');
+		var ySpan = $('<div>').appendTo('body');
+		var xDeltaSpan = $('<div>').appendTo('body');
+		var yDeltaSpan = $('<div>').appendTo('body');
+
+		var down = $(document).onAsObservable('mousedown');
+		var move = $(document).onAsObservable('mousemove');
+		var up = $(document).onAsObservable('mouseup');
+
+		down
+			.selectMany(function (e) {
+				return move
+					.scan({ x:0, y:0, xDelta:0, yDelta: 0 }, function(acc, e) {
+						return {
+							x: e.pageX,
+							y: e.pageY,
+							xDelta: e.pageX - acc.x,
+							yDelta: e.pageY - acc.y
+						};
+					})
+					.takeUntil(up);
+			})
+			.subscribe(function(acc) {
+				xSpan.html('x: ' + acc.x);
+				ySpan.html('y: ' + acc.y);
+				xDeltaSpan.html('x ∆: ' + acc.xDelta);
+				yDeltaSpan.html('y ∆: ' + acc.yDelta);	
+			});

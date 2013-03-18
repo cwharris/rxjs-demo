@@ -1,0 +1,79 @@
+extends layout
+
+block content
+
+	input#a
+	span +
+	input#b
+	span =
+	span#c
+
+block scripts
+
+	script
+
+		var Thing = function() {
+
+			var handlers = [];
+
+			this.onChange = function(handler) {
+				handlers.push(handler);
+			};
+
+			this.change = function(value) {
+				for (var i = 0, length = handlers.length; i < length; i++) {
+					handlers[i](value);
+				}
+			};
+		};
+
+		var DependantThing = function(a, b, func) {
+
+			var handlers = [];
+
+			var aVal = undefined;
+			var bVal = undefined;
+
+			this.onChange = function(handler) {
+				handlers.push(handler);
+			};
+
+			var change = function(value) {
+				for (var i = 0, length = handlers.length; i < length; i++) {
+					handlers[i](value);
+				}
+			};
+
+			a.onChange(function(value) {
+				aVal = value;
+				change(func(aVal, bVal));
+			});
+
+			b.onChange(function(value) {
+				bVal = value;
+				change(func(aVal, bVal));
+			});
+		};
+
+	script
+
+		var cSpan = $('#c');
+
+		$.fn.obsFromValue = function() {
+			return this.onAsObservable('keydown')
+				.delay(0)
+				.select(function(e) {
+					return +$(e.target).val();
+				})
+		};
+
+		var a = $('#a').obsFromValue();
+		var b = $('#b').obsFromValue();
+
+		var c = Rx.Observable.combineLatest(a, b, function(a, b) {
+				return a + b;
+			});
+
+		c.subscribe(function(value) {
+			cSpan.html(value);
+			});

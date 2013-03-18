@@ -1,0 +1,51 @@
+extends layout
+
+block styles
+
+	style
+
+		p {
+			display: inline-block;
+			margin:5px;
+			padding: 5px;
+			background: #eee;
+			border: 1px solid #ddd;
+			border-radius: 3px;
+		}
+		p:hover {
+			background: red;
+		}
+
+block content
+	h1 Contacts 1
+
+block scripts
+	:coffeescript
+
+		$ ->
+
+		contacts = new Rx.BehaviorSubject []
+
+		Rx.Observable.timer(0, 0)
+			.selectMany(->
+				Rx.Observable.range(0, 1000).select(-> 10 + Math.floor Math.random() * 250).distinct().toArray()
+			)
+			.subscribe contacts
+
+		contacts.subscribe (contacts) ->
+
+			dat = d3.select('body').selectAll('p')
+				.data(contacts, (x) -> x)
+
+			dat.enter()
+				.append('p')
+				.text((contact) -> contact)
+
+			dat.exit()
+				.remove()
+
+			#$contacts.empty()
+
+			#contacts.forEach (contact) ->
+
+			#	$contact = $("<div class='hey'>#{contact}</div>").appendTo $contacts
