@@ -1,0 +1,18 @@
+extends layout
+
+block scripts
+
+	script
+
+		// Functional-Reactive Code!... No.
+
+		var clicks = [click1, click2, click3];
+
+		clicks.map(function(e) {
+				return {
+					x: e.pageX,
+					y: e.pageY
+				}
+			});
+
+		console.log(clicks);

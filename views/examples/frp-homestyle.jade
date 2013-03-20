@@ -1,0 +1,127 @@
+extends ../layout
+
+block content
+
+	h1 Functional-Reactive
+
+	p c = a + b, therefore, if <b>a</b> or <b>b</b> changes, <b>c</b> changes.
+
+	p c = a + b = <i id='a'></i> + <i id='b'></i> = <i id='c'></i>
+
+	p#output
+
+block styles
+
+	style
+
+		i {
+			padding: 5px 15px 5px 10px;
+			border: 2px solid white;
+			border-radius: 5px;
+			box-shadow: 0px 0px 5px rgba(0,0,0,0.0);
+			position: relative;
+			-webkit-transition: 0.25s all;
+		}
+
+		i.alter {
+			-webkit-transition: none;
+			background-color: rgba(0,127,255,0.5);
+			box-shadow: 0px 4px 5px rgba(0,0,0,0.25);
+			top: -5px;
+		}
+
+block scripts
+
+	script
+
+		// ----- Custom Observable Classes ----------
+
+		var Thing = function () {
+			var handlers = [];
+
+			this.change = function (value) {
+				handlers.forEach(function (handler) {
+					handler(value);
+				});
+			};
+
+			this.onChange = function (handler) {
+				handlers.push(handler);
+			};
+		};
+
+		var DependantThing = function (a, b, func) {
+			Thing.call(this);
+
+			var aVal;
+			var bVal;
+			var handlers = [];
+
+			var change = function () {
+				var value = func(aVal, bVal);
+				handlers.forEach(function (handler) {
+					handler(value);
+				});
+			};
+
+			this.onChange = function (handler) {
+				handlers.push(handler);
+			};
+
+			a.onChange(function (value) {
+				aVal = value;
+				change();
+			});
+
+			b.onChange(function (value) {
+				bVal = value;
+				change();
+			});
+		};
+
+	script
+
+		// ----- Functional-Reactive Stuff ----------
+
+		var a = new Thing()
+		var b = new Thing()
+
+		var c = new DependantThing(a, b, function (a, b) {
+			return a + b;
+		});
+
+	script
+
+		// ----- Side Effects -----------------------
+
+		a.onChange(function (value) {
+			$('#a').flashClass('alter').html(value);
+		});
+
+		b.onChange(function (value) {
+			$('#b').flashClass('alter').html(value);
+		});
+
+		c.onChange(function (value) {
+			$('#c').flashClass('alter').html(value);
+		});
+
+	script
+
+		// ----- Start things going -----------------
+
+		var aN = 0;
+		var bN = 0;
+
+		var updateA = function() {
+			a.change(aN++);
+			setTimeout(updateA, 650);
+		};
+
+		var updateB = function() {
+			b.change(bN++);
+			setTimeout(updateB, 850);
+		};
+
+		updateA();
+		updateB();

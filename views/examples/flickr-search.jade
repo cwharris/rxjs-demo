@@ -1,0 +1,102 @@
+extends ../layout
+
+block content
+
+	h1 Flickr Search
+
+	div
+		p Tags
+		input#tags(type="text")
+		p Per Page
+		input#perPage(type="text")
+
+	div.results
+
+block styles
+
+	style
+
+		div.results img {
+			float: left;
+			margin: 10px;
+			border: 5px solid white;
+			box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.5);
+		}
+
+block scripts
+
+	script
+
+		// ----- Reusable Stuff -----------------------------------------------------------------------
+
+		$.fn.valAsObservable = function (eventType, throttleTime) {
+			return this.onAsObservable(eventType)
+				.throttle(throttleTime)
+				.select(function (e) {
+					return $(e.target).val();
+				})
+				.distinctUntilChanged();
+		};
+
+		function getSearchResultsAsObservable(tags, perPage) {
+
+					var apiRoot = 'http://api.flickr.com/services/rest/'
+					var apiKey = 'd7a6df186f763f723cdfaf4c113b4840';
+
+					var uri = apiRoot + '?method=flickr.photos.search&api_key=' + apiKey + '&per_page=' + perPage + '&tags=' + tags + '&format=json&jsoncallback=?';
+
+					return $.getJSONAsObservable(uri)
+						.selectMany(function (res) {
+							return Rx.Observable.fromArray(res.data.photos.photo);
+						});
+		};
+
+		function getImageForPhotoAsObservable(photo, size) {
+				var img = new Image();
+				img.src = 'http://farm' + photo.farm + '.staticflickr.com/' + photo.server + '/' + photo.id + '_' + photo.secret + '_' + size + '.jpg';
+				return $(img).onAsObservable('load')
+					.select(function () {
+						return img;
+					});
+		};
+
+		// ----- Search Feature -----------------------------------------------------------------------
+
+		var throttleTime = 350;
+
+		var tags = $('input#tags').valAsObservable('keydown', 350);
+		var perPage = $('input#perPage').valAsObservable('keydown', 350)
+			.select(function(x) { return +x; })
+			.where(function(x) { return x; });
+				
+		var query = Rx.Observable.combineLatest(tags, perPage, function(tags, perPage) {
+				return {
+					tags: tags,
+					perPage: perPage
+				}
+			});
+
+		var results = query.select(function (query) {
+				return getSearchResultsAsObservable(query.tags, query.perPage)
+					.selectMany(function (photo) {
+							return getImageForPhotoAsObservable(photo, 's');
+						});
+			});
+
+		var $results = $('div.results');
+
+		results
+			.subscribe(function (images) {
+
+			images.take(1).subscribe(function(img) {
+				$results.empty();
+			});
+
+			images.delay(0).subscribe(function(img) {
+				$results.append(img);
+			});
+		});
+
+
+
+

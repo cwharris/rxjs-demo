@@ -1,0 +1,61 @@
+extends ../layout
+
+block content
+
+	h1 Reduce / Scan
+
+	p#output 0
+
+block styles
+
+	style
+
+		div.group {
+			border-bottom: 1px solid #eee;
+		}
+
+		label {
+			display: block;
+		}
+
+		span {
+			display: inline-block;
+			width: 10px;
+			height: 10px;
+			border-radius: 5px;
+			padding: 2px 5px;
+			background: #666;
+			margin: 2px;
+		}
+
+		.big-number {
+			text-align: center;
+			font-size: 2em;
+		}
+
+block scripts
+
+	script
+
+		// ----- Observables ------------------------
+
+		var numbers = Rx.Observable.timer(0, 100)
+			.select(function() {
+					return Math.floor(Math.random() * 10);
+				});
+
+		var sum = numbers.scan(0, function (acc, n) {
+				return acc + n;
+			});
+
+		// ----- Side-Effects ------------------------
+
+		var $sum = $('<p>').appendTo('body');
+
+		numbers.subscribe(function (n) {
+				$('p#output').append(' + ' + n);
+			});
+
+		sum.subscribe(function (n) {
+				$sum.html(' = ' + n);
+			});

@@ -1,0 +1,83 @@
+extends ../layout
+
+block content
+
+	h1 Map
+
+block styles
+
+	style
+
+		div.group {
+			border-bottom: 1px solid #eee;
+		}
+
+		label {
+			display: block;
+		}
+
+		span {
+			display: inline-block;
+			width: 10px;
+			height: 10px;
+			border-radius: 5px;
+			padding: 2px 5px;
+			background: #666;
+			margin: 2px;
+		}
+
+		.big-number {
+			text-align: center;
+			font-size: 2em;
+		}
+
+block scripts
+
+	script
+
+		// ----- Observables ------------------------
+
+		var number = Rx.Observable.timer(0, 500)
+			.map(function() {
+				return Math.floor(Math.random() * 100);
+				})
+			.publish();
+
+		var square = number.map(function (n) {
+			return n * n;
+			});
+
+		var cube = number.map(function (n) {
+			return n * n * n;
+			});
+
+		// ----- Side-Effects ------------------------
+
+		var $number = $('<div>').appendTo('body');
+		var $square = $('<div>').appendTo('body');
+		var $cube = $('<div>').appendTo('body');
+
+		number.subscribe(function (n) {
+				$number.html('<pre>n   = ' + n + '</pre>');
+			});
+
+		square.subscribe(function (n) {
+				$square.html('<pre>n^2 = ' + n + '</pre>');
+			});
+
+		cube.subscribe(function (n) {
+				$cube.html('<pre>n^3 = ' + n + '</pre>');
+			});
+
+
+
+
+
+
+
+
+
+
+
+
+

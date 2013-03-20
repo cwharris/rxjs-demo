@@ -1,0 +1,40 @@
+extends ../layout
+
+block content
+
+	h1 Functional
+
+	p numbers = [1, 2, 3, 4, 5]
+	p squares = numbers squared
+	p cubes   = numbers cubed
+	p sum     = numbers summed
+
+block styles
+
+	style
+
+block scripts
+
+	script
+
+		// - Functional -----
+		// Compute the squares and cubes of a list of numbers.
+
+		var numbers = [1, 2, 3, 4, 5];
+		
+		var squares = numbers.map(function (n) {
+			return n * n;
+		});
+
+		var cubes = numbers.map(function (n) {
+			return n * n * n;
+		});
+
+		var sum = numbers.reduce(function (acc, n) {
+			return acc + n;
+		});
+
+		log.append('numbers: ' + numbers);
+		log.append('squares: ' + squares);
+		log.append('cubes:   ' + cubes);
+		log.append('sum:     ' + sum);

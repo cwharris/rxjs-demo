@@ -3,10 +3,30 @@ html
   head
     title= title
     != css('style.css')
+
+    style
+
+        body {
+            font-size: 1.5em;
+        }
+
+        div.log {
+            position: fixed;
+            bottom: 0px;
+            left: 0px;
+            right: 0px;
+            background: rgba(0,0,0,0.25);
+            min-height: 20px;
+            padding: 0px 50px;
+            font-size: 1.5em;
+        }
+
     block styles
 
   body
     block content
+
+    div.log
 
     != js('jquery.js')
     != js('d3.v3.js')
@@ -14,5 +34,44 @@ html
     != js('rx.binding.js')
     != js('rx.time.js')
     != js('rx.jquery.js')
+
+    script
+
+        // ----- Logging Stuff ------------------
+
+        $log = $('div.log');
+
+        var log = {
+            set: function (value) {
+                $log.html('<p><pre>' + value + '</pre></p>');
+            },
+            append: function(value) {
+                $log.append('<p><pre>' + value + '</pre></p>');
+            },
+            clear: function() {
+                $log.empty();
+            }
+        };        
+
+    script
+
+        // ----- Flashing Stuff -----------------
+
+        $.fn.flashClass = function(cls) {
+            var args = arguments;
+            var self = this;
+            self.toggleClass.apply(self, args);
+            setTimeout(function () {
+                self.toggleClass.apply(self, args);
+            });
+            return this;
+        };
+
+    script
+
+        //- $(document).onAsObservable('mousedown')
+        //-     .subscribe(function (e) {
+        //-         e.preventDefault();
+        //-     });
 
     block scripts

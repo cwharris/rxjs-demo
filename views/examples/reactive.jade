@@ -1,0 +1,33 @@
+extends ../layout
+
+block content
+
+	h1 Reactive
+
+	p Click on the document more than 3 times.
+
+block styles
+
+	style
+
+block scripts
+
+	script
+
+		// - Reactive -----
+		// Take 3 clicks, increment a number for each, print the number
+
+		var n = 0;
+		var reaction = function (e) {
+
+			log.append('We got a click: ' + n);
+
+			n++;
+
+			if (n >= 3) {
+				$(document).off('click', reaction);
+			}
+		};
+
+		$(document).on('click', reaction);
+		

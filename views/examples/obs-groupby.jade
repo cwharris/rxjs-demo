@@ -1,0 +1,64 @@
+extends ../layout
+
+block content
+
+	h1 GroupBy
+
+block styles
+
+	style
+
+		div.group {
+			border-bottom: 1px solid #eee;
+		}
+
+		label {
+			display: block;
+		}
+
+		span {
+			display: inline-block;
+			width: 10px;
+			height: 10px;
+			border-radius: 5px;
+			padding: 2px 5px;
+			background: #666;
+			margin: 2px;
+		}
+
+		.big-number {
+			text-align: center;
+			font-size: 2em;
+		}
+
+block scripts
+
+	script
+
+		// ----- Observables ------------------------
+
+		var groups = Rx.Observable.timer(0, 100)
+			.map(function () {
+					return Math.floor(Math.random() * 100);
+				})
+			.groupBy(
+					function (n) { return n; }
+				);
+
+		// ----- Side-Effects ------------------------
+
+		var $number = $('<div class="big-number">').appendTo('body');
+
+		groups.subscribe(function (group) {
+
+			var $group = $('<div class="group">' + group.key + '</div>').appendTo('body');
+
+			group.subscribe(function (n) {
+				$number.flashClass('alert').html(n);
+				$group.append('<span>' + '</span>');
+			});
+
+		});
+
+
+

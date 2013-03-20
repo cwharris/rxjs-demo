@@ -8,6 +8,6 @@ exports.index = function(req, res) {
 };
 
 exports.example = function(req, res) {
-	var id = req.params.id;
-  res.render('example-' + id, { title: 'Example ' + id });
+	var name = req.params.name;
+  res.render('examples/' + name, { title: name });
 };

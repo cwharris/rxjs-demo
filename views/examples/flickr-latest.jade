@@ -1,0 +1,70 @@
+extends ../layout
+
+block content
+
+	h1 Flickr Stream
+
+	div.images
+
+block styles
+
+	style
+
+		div.images div {
+			padding: 20px;
+		}
+
+		div.images img {
+			display: block;
+			margin: auto;
+			border: 5px solid white;
+			box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.5);
+		}
+
+block scripts
+
+	script
+
+		// ----- Reusable, Non-Feature-Related Code ---------------------------------------------------
+
+		function isWindowNearBottom(threshold) {
+			return document.height - (window.innerHeight + window.pageYOffset) <= threshold;
+		};
+
+		function getLatestPhotosAsObservable(perPage) {
+
+					var apiRoot = 'http://api.flickr.com/services/rest/'
+					var apiKey = 'd7a6df186f763f723cdfaf4c113b4840';
+
+					var uri = apiRoot + '?method=flickr.photos.getRecent&api_key=' + apiKey + '&per_page=' + perPage + '&format=json&jsoncallback=?';
+
+					return $.getJSONAsObservable(uri)
+						.selectMany(function (res) {
+								return Rx.Observable.fromArray(res.data.photos.photo);
+							});
+		};
+
+		function getImageForPhotoAsObservable(photo, size) {
+				var img = new Image();
+				img.src = 'http://farm' + photo.farm + '.staticflickr.com/' + photo.server + '/' + photo.id + '_' + photo.secret + '_' + size + '.jpg';
+				return $(img).onAsObservable('load')
+					.select(function () {
+						return img;
+					});
+		};
+
+		// ----- Infinite-Scroll Feature --------------------------------------------------------------
+
+		var latestImages = Rx.Observable.timer(0, 1000)
+			.selectMany(function () { return getLatestPhotosAsObservable(10); })
+			.distinct(function (photo) { return photo.id; })
+			.selectMany(function (photo) { return getImageForPhotoAsObservable(photo, 's'); });
+
+		latestImages.subscribe(function(img) {
+				$('<div>').append(img).prependTo('div.images').hide().slideDown(250);
+			});
+
+
+
+
+		
